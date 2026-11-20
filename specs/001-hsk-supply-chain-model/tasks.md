@@ -18,9 +18,9 @@
 
 **Purpose**: Project initialization, core mathematical & test dependencies installation
 
-- [ ] T001 Install runtime and dev dependencies: `npm install decimal.js zod && npm install -D vitest @types/decimal.js`
-- [ ] T002 [P] Configure Vitest test runner in `vite.config.ts` (or `vitest.config.ts`) and add `"test": "vitest run"` script in `package.json`
-- [ ] T003 [P] Setup directory scaffolding for pure domain layer: `src/domain/types/`, `src/domain/hsk/`, `src/domain/graph/`, `src/domain/seed/`, and `tests/domain/`
+- [x] T001 Install runtime and dev dependencies: `npm install decimal.js zod && npm install -D vitest @types/decimal.js`
+- [x] T002 [P] Configure Vitest test runner in `vite.config.ts` (or `vitest.config.ts`) and add `"test": "vitest run"` script in `package.json`
+- [x] T003 [P] Setup directory scaffolding for pure domain layer: `src/domain/types/`, `src/domain/hsk/`, `src/domain/graph/`, `src/domain/seed/`, and `tests/domain/`
 
 ---
 
@@ -30,12 +30,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 [P] Implement core enum schemas (`NodeCategoryEnum`, `NodeGranularityEnum`, `CapacityUnitEnum`) and types with `categories` array support in `src/domain/types/node.ts` (per `data-model.md#NodeCategoryEnum`)
-- [ ] T005 [P] Implement commodity enum schemas (`CommodityIdEnum`), `CommodityStandardUnit` map, and `HskMappingEntry` interface in `src/domain/types/commodity.ts` (per `data-model.md#CommodityIdEnum`)
-- [ ] T006 [P] Implement `NodeSchema` with Screaming Snake ID pattern (`NODE_[A-Z0-9_]+`), ISO countryCode, and `isFeocRisk` in `src/domain/types/node.ts` (per `data-model.md#NodeSchema`)
-- [ ] T007 Implement `EdgeSchema` with Screaming Snake ID (`EDGE_[A-Z0-9_]+`), `baselineShare` range `(0, 1]`, and standard unit refinement in `src/domain/types/edge.ts` (per `data-model.md#EdgeSchema`)
-- [ ] T008 Implement `SupplyChainGraphSchema` combining `NodeSchema` and `EdgeSchema` in `src/domain/types/graph.ts` (per `data-model.md#SupplyChainGraphSchema`)
-- [ ] T009 Export all types and schemas from `src/domain/types/index.ts`
+- [x] T004 [P] Implement core enum schemas (`NodeCategoryEnum`, `NodeGranularityEnum`, `CapacityUnitEnum`) and types with `categories` array support in `src/domain/types/node.ts` (per `data-model.md#NodeCategoryEnum`)
+- [x] T005 [P] Implement commodity enum schemas (`CommodityIdEnum`), `CommodityStandardUnit` map, and `HskMappingEntry` interface in `src/domain/types/commodity.ts` (per `data-model.md#CommodityIdEnum`)
+- [x] T006 [P] Implement `NodeSchema` with Screaming Snake ID pattern (`NODE_[A-Z0-9_]+`), ISO countryCode, and `isFeocRisk` in `src/domain/types/node.ts` (per `data-model.md#NodeSchema`)
+- [x] T007 Implement `EdgeSchema` with Screaming Snake ID (`EDGE_[A-Z0-9_]+`), `baselineShare` range `(0, 1]`, and standard unit refinement in `src/domain/types/edge.ts` (per `data-model.md#EdgeSchema`)
+- [x] T008 Implement `SupplyChainGraphSchema` combining `NodeSchema` and `EdgeSchema` in `src/domain/types/graph.ts` (per `data-model.md#SupplyChainGraphSchema`)
+- [x] T009 Export all types and schemas from `src/domain/types/index.ts`
 
 **Checkpoint**: Core domain schema foundations ready — User story implementation can now proceed.
 
@@ -50,16 +50,16 @@
 ### Tests for User Story 1 ⚠️
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T010 [P] [US1] Unit test for Node & Edge schema validation (valid screaming snake IDs, multi-category nodes, capacity units, invalid schemas) in `tests/domain/nodeEdgeSchema.test.ts`
-- [ ] T011 [P] [US1] Unit test for `DEFAULT_SUPPLY_CHAIN_GRAPH` schema parsing and basic entity structure in `tests/domain/seedGraph.test.ts`
+- [x] T010 [P] [US1] Unit test for Node & Edge schema validation (valid screaming snake IDs, multi-category nodes, capacity units, invalid schemas) in `tests/domain/nodeEdgeSchema.test.ts`
+- [x] T011 [P] [US1] Unit test for `DEFAULT_SUPPLY_CHAIN_GRAPH` schema parsing and basic entity structure in `tests/domain/seedGraph.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T012 [P] [US1] Define 5 foreign country hub nodes (AU lithium mine, CL lithium refinery, CN lithium refinery, CN precursor hub, CN graphite hub) with `isFeocRisk` flags in `src/domain/seed/seedGraph.ts`
-- [ ] T013 [P] [US1] Define 9 domestic facility nodes (POSCO Pilbara, Ecopro Materials, POSCO Future M, Ecopro BM, LG Chem, Umicore Cheonan with `['REFINERY', 'ACTIVE_MATERIAL']`, LG Energy Solution, Samsung SDI, SK On) in `src/domain/seed/seedGraph.ts`
-- [ ] T014 [US1] Define connecting edges between overseas hubs and domestic facilities reflecting realistic baseline supply shares and standard commodity units in `src/domain/seed/seedGraph.ts`
-- [ ] T015 [US1] Assemble and export `DEFAULT_SUPPLY_CHAIN_GRAPH` validated by `SupplyChainGraphSchema` in `src/domain/seed/seedGraph.ts`
-- [ ] T016 [US1] Export seed entities via `src/domain/index.ts`
+- [x] T012 [P] [US1] Define 5 foreign country hub nodes (AU lithium mine, CL lithium refinery, CN lithium refinery, CN precursor hub, CN graphite hub) with `isFeocRisk` flags in `src/domain/seed/seedGraph.ts`
+- [x] T013 [P] [US1] Define 9 domestic facility nodes (POSCO Pilbara, Ecopro Materials, POSCO Future M, Ecopro BM, LG Chem, Umicore Cheonan with `['REFINERY', 'ACTIVE_MATERIAL']`, LG Energy Solution, Samsung SDI, SK On) in `src/domain/seed/seedGraph.ts`
+- [x] T014 [US1] Define connecting edges between overseas hubs and domestic facilities reflecting realistic baseline supply shares and standard commodity units in `src/domain/seed/seedGraph.ts`
+- [x] T015 [US1] Assemble and export `DEFAULT_SUPPLY_CHAIN_GRAPH` validated by `SupplyChainGraphSchema` in `src/domain/seed/seedGraph.ts`
+- [x] T016 [US1] Export seed entities via `src/domain/index.ts`
 
 **Checkpoint**: User Story 1 (MVP) fully testable and operational.
 
@@ -74,13 +74,13 @@
 ### Tests for User Story 2 ⚠️
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T017 [P] [US2] Unit test for HSK conversion precision (880 LCE_TON for 1000 MT LiOH, 500 LCE_TON for 500 MT Li2CO3, 1:1 MT for NCM/Graphite, unsupported code exception) in `tests/domain/hskConverter.test.ts`
+- [x] T017 [P] [US2] Unit test for HSK conversion precision (880 LCE_TON for 1000 MT LiOH, 500 LCE_TON for 500 MT Li2CO3, 1:1 MT for NCM/Graphite, unsupported code exception) in `tests/domain/hskConverter.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T018 [P] [US2] Create `HSK_COMMODITY_MAP` mapping table for the 5 target commodities (2825.20-2000, 2836.91-0000, 2825.90-2050, 2504.10-1000, 3801.10-0000) in `src/domain/hsk/hskMapping.ts`
-- [ ] T019 [US2] Implement `convertHskToStandardVolume` using `Decimal.js` for precise multiplication and standard unit resolution in `src/domain/hsk/converter.ts`
-- [ ] T020 [US2] Export HSK mapping and conversion functions via `src/domain/index.ts`
+- [x] T018 [P] [US2] Create `HSK_COMMODITY_MAP` mapping table for the 5 target commodities (2825.20-2000, 2836.91-0000, 2825.90-2050, 2504.10-1000, 3801.10-0000) in `src/domain/hsk/hskMapping.ts`
+- [x] T019 [US2] Implement `convertHskToStandardVolume` using `Decimal.js` for precise multiplication and standard unit resolution in `src/domain/hsk/converter.ts`
+- [x] T020 [US2] Export HSK mapping and conversion functions via `src/domain/index.ts`
 
 **Checkpoint**: User Stories 1 and 2 both work independently and test cleanly.
 
@@ -95,17 +95,17 @@
 ### Tests for User Story 3 ⚠️
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T021 [P] [US3] Unit test for `baselineShare` strict 1.0 sum validation (valid sum, sum < 1.0 error, sum > 1.0 error, last-edge absorption verification) using `Decimal.js` in `tests/domain/validator.test.ts`
-- [ ] T022 [P] [US3] Unit test for Kahn's algorithm DAG cycle detection (acyclic graph topological sort output, direct cycle detection, indirect cycle detection) in `tests/domain/validator.test.ts`
-- [ ] T023 [P] [US3] Comprehensive integrity test asserting `validateSupplyChainGraph(DEFAULT_SUPPLY_CHAIN_GRAPH).isValid === true` in `tests/domain/seedGraph.test.ts`
+- [x] T021 [P] [US3] Unit test for `baselineShare` strict 1.0 sum validation (valid sum, sum < 1.0 error, sum > 1.0 error, last-edge absorption verification) using `Decimal.js` in `tests/domain/validator.test.ts`
+- [x] T022 [P] [US3] Unit test for Kahn's algorithm DAG cycle detection (acyclic graph topological sort output, direct cycle detection, indirect cycle detection) in `tests/domain/validator.test.ts`
+- [x] T023 [P] [US3] Comprehensive integrity test asserting `validateSupplyChainGraph(DEFAULT_SUPPLY_CHAIN_GRAPH).isValid === true` in `tests/domain/seedGraph.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T024 [P] [US3] Implement Kahn's Algorithm for topological sorting and cycle detection in `src/domain/graph/validator.ts`
-- [ ] T025 [P] [US3] Implement incoming `baselineShare` sum check per target node and commodity using `Decimal.js` strict equality (`.equals(new Decimal(1.0))`) in `src/domain/graph/validator.ts`
-- [ ] T026 [US3] Implement unified `validateSupplyChainGraph(graph)` returning `GraphValidationResult` in `src/domain/graph/validator.ts`
-- [ ] T027 [US3] Audit `DEFAULT_SUPPLY_CHAIN_GRAPH` edges in `src/domain/seed/seedGraph.ts` to ensure all target nodes satisfy strict 1.0 baselineShare sum via last-edge absorption rule
-- [ ] T028 [US3] Export validator utilities and contracts via `src/domain/index.ts`
+- [x] T024 [P] [US3] Implement Kahn's Algorithm for topological sorting and cycle detection in `src/domain/graph/validator.ts`
+- [x] T025 [P] [US3] Implement incoming `baselineShare` sum check per target node and commodity using `Decimal.js` strict equality (`.equals(new Decimal(1.0))`) in `src/domain/graph/validator.ts`
+- [x] T026 [US3] Implement unified `validateSupplyChainGraph(graph)` returning `GraphValidationResult` in `src/domain/graph/validator.ts`
+- [x] T027 [US3] Audit `DEFAULT_SUPPLY_CHAIN_GRAPH` edges in `src/domain/seed/seedGraph.ts` to ensure all target nodes satisfy strict 1.0 baselineShare sum via last-edge absorption rule
+- [x] T028 [US3] Export validator utilities and contracts via `src/domain/index.ts`
 
 **Checkpoint**: All user stories (US1, US2, US3) are fully functional, verified by Vitest tests.
 
@@ -115,9 +115,9 @@
 
 **Purpose**: Documentation validation, code cleanliness, and boundary checks
 
-- [ ] T029 [P] Verify `README.md` and `specs/001-hsk-supply-chain-model/quickstart.md` code examples against actual exported modules
-- [ ] T030 Run full test suite (`npm run test`) and linter (`npm run lint`), fixing any compiler warnings or type inconsistencies
-- [ ] T031 Verify Constitution compliance: 0 React/DOM imports in `src/domain/`, strict mode passes with 0 `any`, all calculations use `Decimal.js`
+- [x] T029 [P] Verify `README.md` and `specs/001-hsk-supply-chain-model/quickstart.md` code examples against actual exported modules
+- [x] T030 Run full test suite (`npm run test`) and linter (`npm run lint`), fixing any compiler warnings or type inconsistencies
+- [x] T031 Verify Constitution compliance: 0 React/DOM imports in `src/domain/`, strict mode passes with 0 `any`, all calculations use `Decimal.js`
 
 ---
 
@@ -152,4 +152,3 @@
 2. US2 -> HSK trade import volume converter (LCE / MT).
 3. US3 -> Rigorous mathematical validation (Decimal.js strict 1.0 + Kahn DAG).
 4. Polish -> 100% Constitution compliance & test pass.
-
