@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "PostgreSQL 영속화 및 관세청 HSK 통계 수집 파이프라인 (관세청 포털 tradedata.go.kr 우선 연동 및 공공데이터포털 API 단계적 확장)"
+**Input**: User description: "PostgreSQL 영속화 및 관세청 HSK 통계 수집 파이프라인 (최신 1개년 확정 통계 기준 엣지 모델링, 핵심국가 Whitelist & Top-N 비례 재정규화, tradedata.go.kr 우선 연동 및 공공데이터포털 API 단계적 확장)"
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -26,18 +26,18 @@
 
 ---
 
-### User Story 2 - 관세청 수출입무역통계 포털(tradedata.go.kr) 자료 ETL 및 엣지 가중치 갱신 (Priority: P2)
+### User Story 2 - 관세청 통계 포털(tradedata.go.kr) 자료 ETL 및 국가 필터링·점유율 갱신 (Priority: P2)
 
-데이터 엔지니어는 관세청 수출입무역통계 포털(`tradedata.go.kr`)에서 내려받은 품목별 국가별 수입 실적(CSV/Excel)을 로컬 디렉토리(`data/raw/customs/`)에 배치하고 ETL 파이프라인을 실행하여, `Decimal.js` 기반 표준 단위(LCE/MT) 환산 및 국가별 점유율을 계산하고 DB 엣지의 가중치(`baselineShare`, `annualVolume`)를 최신 통계로 갱신할 수 있다.
+데이터 엔지니어는 관세청 수출입무역통계 포털(`tradedata.go.kr`)에서 내려받은 **최신 1개년 확정 통계(Full-Year)** 품목별 국가별 수입 실적(CSV)을 로컬 디렉토리(`data/raw/customs/`)에 배치하고 ETL 파이프라인을 실행하여, 핵심 국가(중국, 칠레, 호주 등) 중심 필터링과 미세 잔여국 비례 재정규화를 통해 `Decimal.js` 기준 엄격히 `1.0000`의 점유율로 DB 엣지의 가중치(`baselineShare`, `annualVolume`, `basePeriod`)를 갱신할 수 있다.
 
-**Why this priority**: 공공데이터포털 접속 장애와 무관하게 공식 실적 데이터를 즉시 반영하여 공급망 엣지 점유율의 현실성을 확보하기 위함이다.
+**Why this priority**: 부분 누적 기간의 왜곡을 방지하고 완전한 1개년 확정 실적을 기반으로 공급망 엣지 점유율의 현실성과 정확성을 담보하기 위함이다.
 
-**Independent Test**: `tradedata.go.kr` 표준 포맷의 CSV 파일을 파이프라인에 입력하여 `hsk_import_logs` 적재 및 해외 허브(`COUNTRY_HUB`) 유입 엣지의 `baselineShare` 합계가 정확히 `1.0000`으로 갱신되는지 단위/통합 테스트로 검증한다.
+**Independent Test**: `tradedata.go.kr` 표준 포맷의 최신 1개년 확정 통계 CSV 파일을 파이프라인에 입력하여 `hsk_import_logs` 적재, 비례 재정규화(Rescaling) 적용, 그리고 해외 허브(`COUNTRY_HUB`) 유입 엣지의 `baselineShare` 합계가 정확히 `1.0000`으로 갱신되는지 단위/통합 테스트로 검증한다.
 
 **Acceptance Scenarios**:
 
-1. **Given** `data/raw/customs/` 경로에 관세청 포털 규격의 수입 실적 CSV가 주어졌을 때, **When** ETL 파이프라인(`npm run etl:customs`)을 실행하면, **Then** 파일이 파싱되어 `hsk_import_logs`에 정상 적재된다.
-2. **Given** 특정 HSK 품목(예: 수산화리튬)의 국가별 수입 중량이 입력되었을 때, **When** 가중치 갱신 로직이 실행되면, **Then** Spec 1의 `convertHskToStandardVolume`을 거쳐 계산된 국가별 점유율(`Decimal` 연산, 합계 1.0000)이 대응하는 `COUNTRY_HUB` 엣지의 `baselineShare`에 트랜잭션으로 반영된다.
+1. **Given** `data/raw/customs/` 경로에 최신 1개년 관세청 포털 규격의 수입 실적 CSV가 주어졌을 때, **When** ETL 파이프라인(`npm run etl:customs`)을 실행하면, **Then** 원시 수입 실적이 `hsk_import_logs`에 적재되고 파일 내 최신 확정 연도가 `basePeriod`로 자동 감지된다.
+2. **Given** 특정 HSK 품목(예: 수산화리튬)에서 20여 개 수입국 데이터가 존재할 때, **When** 국가 필터링 및 엣지 갱신 로직이 실행되면, **Then** Whitelist 국가(CN, CL, AU 등 점유율 5% 이상)를 선별하고 미세 잔여 국가를 제외한 후, 상위 국가들 간의 비례 재정규화(Rescaling)를 거쳐 `Decimal` 합계가 정확히 `1.0000`이 되도록 엣지의 `baselineShare`와 `annualVolume`을 트랜잭션 단위로 갱신한다.
 3. **Given** 향후 공공데이터포털 OpenAPI 키가 제공되는 경우, **When** API 수집 모드를 활성화하면, **Then** 동일한 정규화 및 점유율 계산 로직을 공유하여 엣지 가중치가 갱신된다.
 
 ---
@@ -61,7 +61,7 @@
 ### Edge Cases
 
 - **비정형 CSV 인코딩(EUC-KR vs UTF-8)**: 관세청 포털에서 내려받은 CSV가 한글 윈도우 기본(EUC-KR/CP949)인 경우와 UTF-8인 경우를 모두 감지하여 자동 디코딩한다.
-- **국가별 점유율 계산 시 잔여 오차 흡수**: 1/3 분할 등 무한소수 발생 시, Spec 1 Constitution 원칙에 따라 최대 점유율 국가 엣지(또는 마지막 엣지)가 잔여 소수점을 흡수하여 `sum(baselineShare) == 1.0000`을 강제한다.
+- **국가별 점유율 재스케일링 시 잔여 오차 흡수**: 상위 핵심 국가들로 재정규화 후 1/3 분할 등 무한소수 발생 시, Spec 1 Constitution 원칙에 따라 최대 점유율 국가 엣지(또는 마지막 엣지)가 잔여 소수점을 흡수하여 `sum(baselineShare) == 1.0000`을 강제한다.
 - **DB Connection 실패 및 트랜잭션 롤백**: 가중치 일괄 갱신 도중 오류 발생 시 트랜잭션을 즉시 롤백하여 일부 엣지만 갱신되어 점유율 총합이 깨지는 불일치를 원천 차단한다.
 - **공공데이터포털 API Fallback**: API 모드 실행 시 키 누락이나 네트워크 타임아웃 발생 시 파일 기반 파이프라인으로 안전하게 대체 동작한다.
 
@@ -71,20 +71,20 @@
 
 - **FR-001**: 시스템은 Drizzle ORM을 활용하여 PostgreSQL 기반의 4개 핵심 테이블(`nodes`, `edges`, `hsk_import_logs`, `simulation_scenarios`) 스키마를 정의해야 한다.
 - **FR-002**: `nodes` 테이블은 `id`(PK, varchar), `name`, `countryCode`(char 2), `categories`(jsonb: `NodeCategory[]`), `granularity`, `annualCapacity`(numeric), `capacityUnit`, `isFeocRisk`(boolean), `uiPosition`(jsonb, nullable), `updatedAt`(timestamp) 필드를 포함해야 한다.
-- **FR-003**: `edges` 테이블은 `id`(PK, varchar), `sourceNodeId`(FK -> `nodes.id`), `targetNodeId`(FK -> `nodes.id`), `commodityId`, `baselineShare`(numeric(6, 4)), `annualVolume`(numeric), `unit`, `basePeriod`(varchar) 필드를 포함해야 한다.
+- **FR-003**: `edges` 테이블은 `id`(PK, varchar), `sourceNodeId`(FK -> `nodes.id`), `targetNodeId`(FK -> `nodes.id`), `commodityId`, `baselineShare`(numeric(6, 4)), `annualVolume`(numeric), `unit`, `basePeriod`(varchar: 수집 파일 기준 최신 1개년 확정 연도 예 `'2024'` 또는 `'2025'`) 필드를 포함해야 한다.
 - **FR-004**: `hsk_import_logs` 테이블은 `id`(serial PK), `hskCode`, `partnerCountryCode`(char 2), `period`(varchar: 연도/연월), `rawWeightKg`(numeric), `standardVolume`(numeric), `importAmountUsd`(numeric), `sourceType`(varchar: `'TRADEDATA_FILE' | 'PUBLIC_API'`), `fetchedAt`(timestamp) 필드를 포함해야 한다.
 - **FR-005**: `simulation_scenarios` 테이블은 `id`(uuid PK), `title`, `description`(text, nullable), `shocks`(jsonb), `resultSnapshot`(jsonb), `createdAt`(timestamp) 필드를 포함해야 한다.
 - **FR-006**: 시스템은 Spec 1의 `DEFAULT_SUPPLY_CHAIN_GRAPH` 데이터를 DB에 멱등하게 삽입/갱신하는 `db:seed` 스크립트를 제공해야 한다.
-- **FR-007**: 시스템은 관세청 무역통계 포털(`tradedata.go.kr`)의 품목별 국가별 수입 실적 파일(CSV)을 읽어 `convertHskToStandardVolume`으로 LCE/MT 환산 후 `hsk_import_logs`에 적재하는 1차 ETL 파이프라인을 구현해야 한다.
-- **FR-008**: 향후 공공데이터포털 OpenAPI 연동을 위한 어댑터 모듈 인터페이스를 마련하여, 추후 API 키 등록 시 동일한 적재 파이프라인이 구동되도록 확장성을 보장해야 한다.
-- **FR-009**: ETL 파이프라인은 동일 `commodityId` 기준 국가별 수입 비중을 `Decimal.js`로 정밀 계산하고, 연관된 `COUNTRY_HUB` 출발 엣지의 `baselineShare`와 `annualVolume`을 트랜잭션 내에서 일괄 갱신해야 한다.
+- **FR-007**: 시스템은 관세청 무역통계 포털(`tradedata.go.kr`)의 최신 1개년 확정 실적 파일(CSV)을 읽어 `convertHskToStandardVolume`으로 LCE/MT 환산 후 `hsk_import_logs`에 적재하는 1차 ETL 파이프라인을 구현해야 한다.
+- **FR-008**: 시스템은 20여 개 이상의 원시 수입국 목록 중 핵심 Whitelist 국가(중국, 칠레, 호주 등) 및 점유율 5% 이상 국가를 필터링하고, 미세 잔여 국가를 제외한 상위 국가들의 비중을 `Decimal.js`로 비례 재정규화(Rescaling)하여 `baselineShare` 총합이 정확히 `1.0000`이 되도록 엣지를 갱신해야 한다.
+- **FR-009**: 향후 공공데이터포털 OpenAPI 연동을 위한 어댑터 모듈 인터페이스를 마련하여, 추후 API 키 등록 시 동일한 적재 및 필터링 파이프라인이 구동되도록 확장성을 보장해야 한다.
 - **FR-010**: DB의 최신 `nodes`와 `edges`를 조회하여 Spec 1의 `SupplyChainGraph` 형태로 매핑 및 반환하는 `getActiveSupplyChainGraph()` 함수를 제공해야 한다.
 - **FR-011**: 시나리오 시뮬레이션의 입력 조건 및 계산 결과 스냅샷을 저장, 단건 조회, 목록 조회하는 리포지토리/서비스 함수를 제공해야 한다.
 
 ### Key Entities *(include if feature involves data)*
 
 - **NodeEntity (`nodes`)**: 공급망 마스터 거점. 다중 공정 카테고리(`categories`)를 JSONB 배열로 저장.
-- **EdgeEntity (`edges`)**: 거점 간 원자재 공급 관계 및 물동량. 최신 통계 기준 점유율(`baselineShare`) 저장.
+- **EdgeEntity (`edges`)**: 거점 간 원자재 공급 관계 및 물동량. 최신 1개년 확정 통계 기준 국가별 필터링/재정규화된 점유율(`baselineShare`) 저장.
 - **HskImportLogEntity (`hsk_import_logs`)**: 관세청 통계 포털 및 OpenAPI로부터 수집된 원시 수입 통계 및 LCE 환산 로그.
 - **SimulationScenarioEntity (`simulation_scenarios`)**: 충격 전파 시뮬레이션의 시나리오 조건(`shocks`)과 결과(`resultSnapshot`) 캐시.
 
@@ -94,12 +94,12 @@
 
 - **SC-001**: `drizzle-kit generate` 및 마이그레이션 DDL이 PostgreSQL 환경(PGlite 포함)에서 100% 정상 적용된다.
 - **SC-002**: `db:seed` 스크립트를 2회 연속 실행해도 Unique 제약 조건 에러 없이 동일한 노드(14개) 및 엣지 수가 유지된다 (멱등성 100%).
-- **SC-003**: `tradedata.go.kr` 표준 포맷의 CSV 데이터를 파싱한 ETL 파이프라인 실행 시 `hsk_import_logs` 적재 및 엣지 갱신이 트랜잭션 내에서 완료되며, 갱신된 국가별 엣지 `baselineShare` 총합이 정확히 `1.0000`을 만족한다.
+- **SC-003**: 20여 개국 원시 CSV 데이터를 파싱한 ETL 파이프라인 실행 시, 핵심 국가 선별 및 비례 재정규화 알고리즘을 거쳐 갱신된 국가별 엣지 `baselineShare` 총합이 오차 없이 정확히 `1.0000`을 만족한다.
 - **SC-004**: `getActiveSupplyChainGraph()`의 반환값이 Spec 1의 `SupplyChainGraphSchema.safeParse().success === true`를 만족한다.
 - **SC-005**: Vitest 기반의 영속성 및 파이프라인 단위/통합 테스트 스위트가 에러 없이 100% 통과한다.
 
 ## Assumptions
 
-- 1차 데이터 소스로 관세청 수출입무역통계 포털(`tradedata.go.kr`)의 2024~2025년 기준 확정 통계 CSV를 사용하며, 파일은 `data/raw/customs/` 경로에 배치한다.
-- 공공데이터포털 일반 OpenAPI 연동은 플러그형(Pluggable) 어댑터로 설계하여, 추후 API 키 등록 시 즉시 동작할 수 있도록 준비한다.
+- MVP의 공급망 그래프 엣지 기준 기간은 **최신 1개년 확정 통계(Full-Year, 예: 2024년 또는 2025년 마감치)**로 설정하며, CSV 파일에 수록된 연도를 파이프라인이 자동 인식하여 `basePeriod`에 반영한다.
+- 원시 통계 수집 파일은 `data/raw/customs/` 경로에 배치하며, 국가 필터링 시 Whitelist(중국, 칠레, 호주) 외 미세 국가는 비례 재스케일링으로 처리하여 14개 노드 구조를 유지한다.
 - 테스트 환경에서는 외부 DB 설치 없이 `@electric-sql/pglite`를 통해 100% 동일한 PostgreSQL 환경에서 검증한다.
