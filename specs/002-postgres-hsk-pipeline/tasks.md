@@ -18,10 +18,10 @@
 
 **Purpose**: Database, ORM, CSV parsing, and PGlite test infrastructure installation
 
-- [ ] T001 Install runtime and dev dependencies: `npm install drizzle-orm postgres csv-parse && npm install -D drizzle-kit @electric-sql/pglite`
-- [ ] T002 [P] Create `drizzle.config.ts` for schema management and migration output directory (`drizzle/`)
-- [ ] T003 [P] Add DB and ETL scripts in `package.json` (`"db:push"`, `"db:generate"`, `"db:seed"`, `"etl:customs"`)
-- [ ] T004 [P] Create directory scaffolding: `src/db/repository/`, `src/pipeline/parser/`, `src/pipeline/normalizer/`, `tests/helpers/`, and `tests/pipeline/`
+- [x] T001 Install runtime and dev dependencies: `npm install drizzle-orm postgres csv-parse && npm install -D drizzle-kit @electric-sql/pglite`
+- [x] T002 [P] Create `drizzle.config.ts` for schema management and migration output directory (`drizzle/`)
+- [x] T003 [P] Add DB and ETL scripts in `package.json` (`"db:push"`, `"db:generate"`, `"db:seed"`, `"etl:customs"`)
+- [x] T004 [P] Create directory scaffolding: `src/db/repository/`, `src/pipeline/parser/`, `src/pipeline/normalizer/`, `tests/helpers/`, and `tests/pipeline/`
 
 ---
 
@@ -31,10 +31,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 [P] Implement Drizzle tables (`nodes`, `edges`, `hsk_import_logs`, `simulation_scenarios`) with JSONB custom types in `src/db/schema.ts` (per `data-model.md#1-drizzle-database-schemas`)
-- [ ] T006 [P] Implement PostgreSQL production connection client with environment variable handling (`DATABASE_URL`) in `src/db/client.ts`
-- [ ] T007 Implement PGlite in-memory test DB helper with automatic schema setup in `tests/helpers/testDb.ts`
-- [ ] T008 Implement Korean-to-ISO2 country code mapping dictionary (`KOREAN_COUNTRY_CODE_MAP`) and helper in `src/domain/hsk/countryMapping.ts`
+- [x] T005 [P] Implement Drizzle tables (`nodes`, `edges`, `hsk_import_logs`, `simulation_scenarios`) with JSONB custom types in `src/db/schema.ts` (per `data-model.md#1-drizzle-database-schemas`)
+- [x] T006 [P] Implement PostgreSQL production connection client with environment variable handling (`DATABASE_URL`) in `src/db/client.ts`
+- [x] T007 Implement PGlite in-memory test DB helper with automatic schema setup in `tests/helpers/testDb.ts`
+- [x] T008 Implement Korean-to-ISO2 country code mapping dictionary (`KOREAN_COUNTRY_CODE_MAP`) and helper in `src/domain/hsk/countryMapping.ts`
 
 **Checkpoint**: Database schema and test infrastructure ready — User story implementation can now begin.
 
@@ -49,13 +49,13 @@
 ### Tests for User Story 1 ⚠️
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T009 [P] [US1] Integration test for schema tables creation and `seedSupplyChainGraph` idempotency (running seed twice maintains exact row counts without errors) in `tests/pipeline/dbPersistence.test.ts`
+- [x] T009 [P] [US1] Integration test for schema tables creation and `seedSupplyChainGraph` idempotency (running seed twice maintains exact row counts without errors) in `tests/pipeline/dbPersistence.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] Implement `GraphRepository.seedSupplyChainGraph(graph)` using `onConflictDoUpdate` for idempotent upsert in `src/db/repository/graphRepository.ts`
-- [ ] T011 [US1] Create standalone executable CLI seed script `src/db/seed.ts` that loads `DEFAULT_SUPPLY_CHAIN_GRAPH` and calls `seedSupplyChainGraph`
-- [ ] T012 [US1] Export database schema and repository interfaces via `src/db/index.ts`
+- [x] T010 [P] [US1] Implement `GraphRepository.seedSupplyChainGraph(graph)` using `onConflictDoUpdate` for idempotent upsert in `src/db/repository/graphRepository.ts`
+- [x] T011 [US1] Create standalone executable CLI seed script `src/db/seed.ts` that loads `DEFAULT_SUPPLY_CHAIN_GRAPH` and calls `seedSupplyChainGraph`
+- [x] T012 [US1] Export database schema and repository interfaces via `src/db/index.ts`
 
 **Checkpoint**: User Story 1 (MVP) fully testable and operational.
 
@@ -70,16 +70,16 @@
 ### Tests for User Story 2 ⚠️
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T013 [P] [US2] Unit test for CSV parser with quote handling, CP949/UTF-8 decoding, and column mapping in `tests/pipeline/csvParser.test.ts`
-- [ ] T014 [P] [US2] Unit test for top-N whitelist filtering and Decimal.js proportional rescaling with last-edge absorption rule in `tests/pipeline/shareRescaler.test.ts`
-- [ ] T015 [P] [US2] End-to-end integration test for `CustomsEtlService.processCustomsCsv` with PGlite verifying `hsk_import_logs` count and edge baselineShare sum == 1.0000 in `tests/pipeline/customsEtlService.test.ts`
+- [x] T013 [P] [US2] Unit test for CSV parser with quote handling, CP949/UTF-8 decoding, and column mapping in `tests/pipeline/csvParser.test.ts`
+- [x] T014 [P] [US2] Unit test for top-N whitelist filtering and Decimal.js proportional rescaling with last-edge absorption rule in `tests/pipeline/shareRescaler.test.ts`
+- [x] T015 [P] [US2] End-to-end integration test for `CustomsEtlService.processCustomsCsv` with PGlite verifying `hsk_import_logs` count and edge baselineShare sum == 1.0000 in `tests/pipeline/customsEtlService.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T016 [P] [US2] Implement `parseCustomsCsv(filePath)` using `csv-parse` to stream and parse raw customs records in `src/pipeline/parser/csvParser.ts`
-- [ ] T017 [P] [US2] Implement `rescaleCommodityShares(rawImports)` with Whitelist (CN, CL, AU), 5% cutoff, and Decimal.js strict 1.0000 absorption in `src/pipeline/normalizer/shareRescaler.ts`
-- [ ] T018 [US2] Implement `CustomsEtlService.processCustomsCsv` coordinating CSV parsing, LCE conversion, `hsk_import_logs` bulk insertion, and transaction-based edge updates in `src/pipeline/customsEtlService.ts`
-- [ ] T019 [US2] Create standalone CLI script `src/pipeline/runEtl.ts` linked to `npm run etl:customs` that processes `data/raw/customs/customs_trade_2026.csv`
+- [x] T016 [P] [US2] Implement `parseCustomsCsv(filePath)` using `csv-parse` to stream and parse raw customs records in `src/pipeline/parser/csvParser.ts`
+- [x] T017 [P] [US2] Implement `rescaleCommodityShares(rawImports)` with Whitelist (CN, CL, AU), 5% cutoff, and Decimal.js strict 1.0000 absorption in `src/pipeline/normalizer/shareRescaler.ts`
+- [x] T018 [US2] Implement `CustomsEtlService.processCustomsCsv` coordinating CSV parsing, LCE conversion, `hsk_import_logs` bulk insertion, and transaction-based edge updates in `src/pipeline/customsEtlService.ts`
+- [x] T019 [US2] Create standalone CLI script `src/pipeline/runEtl.ts` linked to `npm run etl:customs` that processes `data/raw/customs/customs_trade_2026.csv`
 
 **Checkpoint**: User Stories 1 and 2 work seamlessly together and test cleanly with real trade data.
 
@@ -94,14 +94,14 @@
 ### Tests for User Story 3 ⚠️
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T020 [P] [US3] Unit test for `GraphRepository.getActiveSupplyChainGraph()` validating output against `SupplyChainGraphSchema` in `tests/pipeline/dbPersistence.test.ts`
-- [ ] T021 [P] [US3] Unit test for `ScenarioRepository` (create, findById, findAll with JSONB shocks) in `tests/pipeline/scenarioRepository.test.ts`
+- [x] T020 [P] [US3] Unit test for `GraphRepository.getActiveSupplyChainGraph()` validating output against `SupplyChainGraphSchema` in `tests/pipeline/dbPersistence.test.ts`
+- [x] T021 [P] [US3] Unit test for `ScenarioRepository` (create, findById, findAll with JSONB shocks) in `tests/pipeline/scenarioRepository.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T022 [P] [US3] Implement `GraphRepository.getActiveSupplyChainGraph()` mapping SQL numeric and JSONB columns to Spec 1 domain types in `src/db/repository/graphRepository.ts`
-- [ ] T023 [P] [US3] Implement `ScenarioRepository` supporting CRUD for `simulation_scenarios` in `src/db/repository/scenarioRepository.ts`
-- [ ] T024 [US3] Export pipeline services and repositories via `src/pipeline/index.ts` and update `src/domain/index.ts`
+- [x] T022 [P] [US3] Implement `GraphRepository.getActiveSupplyChainGraph()` mapping SQL numeric and JSONB columns to Spec 1 domain types in `src/db/repository/graphRepository.ts`
+- [x] T023 [P] [US3] Implement `ScenarioRepository` supporting CRUD for `simulation_scenarios` in `src/db/repository/scenarioRepository.ts`
+- [x] T024 [US3] Export pipeline services and repositories via `src/pipeline/index.ts` and update `src/domain/index.ts`
 
 **Checkpoint**: All user stories (US1, US2, US3) are fully functional and pass PGlite integration tests.
 
@@ -111,9 +111,9 @@
 
 **Purpose**: Verification against real CSV data, linter, typecheck, and Constitution compliance
 
-- [ ] T025 [P] Run ETL pipeline against `data/raw/customs/customs_trade_2026.csv` and verify log outputs and edge weight outputs
-- [ ] T026 Run full test suite (`npm run test`) and linter (`npm run lint`), fixing any compiler warnings or type inconsistencies
-- [ ] T027 Verify Constitution compliance: strict TypeScript (0 `any`), Decimal.js precision for all trade share calculations, PGlite clean shutdown
+- [x] T025 [P] Run ETL pipeline against `data/raw/customs/customs_trade_2026.csv` and verify log outputs and edge weight outputs
+- [x] T026 Run full test suite (`npm run test`) and linter (`npm run lint`), fixing any compiler warnings or type inconsistencies
+- [x] T027 Verify Constitution compliance: strict TypeScript (0 `any`), Decimal.js precision for all trade share calculations, PGlite clean shutdown
 
 ---
 
@@ -148,4 +148,3 @@
 2. US2 -> Real customs data ETL pipeline (`customs_trade_2026.csv` -> DB 엣지 갱신).
 3. US3 -> Active graph query & scenario snapshot repository.
 4. Polish -> 100% Constitution & Vitest test pass.
-
